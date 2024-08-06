@@ -144,3 +144,54 @@ document.getElementById('reset').addEventListener('click', function() {
         mouseConstraint
     ]);
 });
+
+document.getElementById('gravity').addEventListener('input', function(e) {
+    engine.world.gravity.y = e.target.value;
+});
+
+document.getElementById('friction').addEventListener('input', function(e) {
+    engine.world.bodies.forEach(function(body) {
+        if (!body.isStatic) {
+            body.friction = e.target.value;
+        }
+    });
+});
+
+// Add initial particles
+for (var i = 0; i < 20; i++) {
+    addParticle();
+}
+
+// Handle window resize
+window.addEventListener('resize', function() {
+    render.canvas.width = window.innerWidth;
+    render.canvas.height = window.innerHeight;
+    Composite.clear(engine.world, false);
+    Composite.add(engine.world, [
+        Bodies.rectangle(window.innerWidth/2, -10, window.innerWidth, 20, wallOptions),
+        Bodies.rectangle(window.innerWidth/2, window.innerHeight + 10, window.innerWidth, 20, wallOptions),
+        Bodies.rectangle(-10, window.innerHeight/2, 20, window.innerHeight, wallOptions),
+        Bodies.rectangle(window.innerWidth + 10, window.innerHeight/2, 20, window.innerHeight, wallOptions),
+        mouseConstraint
+    ]);
+    for (var i = 0; i < 20; i++) {
+        addParticle();
+    }
+});
+
+// Add hover effect
+Events.on(mouseConstraint, 'mousemove', function(event) {
+    var mousePosition = event.mouse.position;
+    engine.world.bodies.forEach(function(body) {
+        if (body.isStatic) return; // Skip walls
+        var distanceSquared = Vector.magnitudeSquared(Vector.sub(mousePosition, body.position));
+        if (distanceSquared < 5000) {
+            body.render.fillStyle = `hsl(${Math.random() * 360}, 100%, 70%)`;
+        } else {
+            body.render.fillStyle = body.render.fillStyle.replace('70%', '50%');
+        }
+    });
+});
+</script>
+</body>
+</html>
